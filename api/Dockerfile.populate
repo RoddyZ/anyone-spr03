@@ -8,12 +8,7 @@ WORKDIR /src
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY . .
-
-FROM base as test
-RUN ["python", "-m", "pytest", "-v", "/src/tests"]
-
-FROM base as build
+COPY ./ /src/
 
 CMD ["python", "populate_db.py"]
 
