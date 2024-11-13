@@ -31,6 +31,41 @@ def login(username: str, password: str) -> Optional[str]:
     #  7. Return the token if login is successful, otherwise return `None`.
     #  8. Test the function with various inputs.
 
+    # 1: Construct the API endpoint URL
+    url = f"{API_BASE_URL}/login"
+
+    # 2: Set up the request headers
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    # 3: Prepare the data payload
+    data = {
+        "grant_type": "",
+        "username": username,
+        "password": password,
+        "scope": "",
+        "client_id": "",
+        "client_secret": ""
+    }
+
+    try:
+        # 4: Use `requests.post()` to send the API request
+        response = requests.post(url, headers=headers, data=data)
+
+        # 5: Check if the response status code is 200
+        if response.status_code == 200:
+            # 6: Extract the token from the JSON response
+            token = response.json().get("access_token")
+
+            # 7: Return the token if login is successful
+            return token
+
+    except requests.RequestException as e:
+        st.error(f"An error occurred while logging in: {e}")
+
+    # 7: Return None if login fails
     return None
 
 
@@ -54,7 +89,32 @@ def predict(token: str, uploaded_file: Image) -> requests.Response:
     #  4. Return the response.
     response = None
 
-    return response
+    # 1: Convert the image to bytes
+    image_bytes = uploaded_file.getvalue()
+
+    # 2: Create a dictionary with the file data without MIME type
+    files = {
+        "file": (uploaded_file.name, image_bytes)
+    }
+
+    # 3: Add only the Authorization token to headers
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    # 4: Construct the correct API endpoint URL
+    url = f"{API_BASE_URL}/model/predict"
+
+    try:
+        # 5: Make a POST request to the predict endpoint with the file and headers
+        response = requests.post(url, headers=headers, files=files)
+
+        # 6: Return the response from the API
+        return response
+
+    except requests.RequestException as e:
+        st.error(f"An error occurred while making the prediction: {e}")
+        return None
 
 
 def send_feedback(
@@ -82,7 +142,32 @@ def send_feedback(
     # 4. Return the response.
     response = None
 
-    return response
+    # 1: Construct the feedback payload
+    payload = {
+        "feedback": feedback,
+        "score": score,
+        "predicted_class": prediction,
+        "image_file_name": image_file_name,
+    }
+
+    # 2: Set up the headers with only the Authorization token
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    # 3: Define the endpoint URL
+    url = f"{API_BASE_URL}/feedback"
+
+    try:
+        # 4: Make a POST request to the feedback endpoint with JSON payload and headers
+        response = requests.post(url, headers=headers, json=payload)
+
+        # 5: Return the response from the API
+        return response
+
+    except requests.RequestException as e:
+        st.error(f"An error occurred while sending feedback: {e}")
+        return None
 
 
 # Interfaz de usuario
