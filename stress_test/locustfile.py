@@ -49,14 +49,23 @@ class APIUser(HttpUser):
     # TODO
     # raise NotImplementedError
     @task(1)
+    def index(self):
+        """Test for the `index` endpoint to ensure it responds successfully."""
+        self.client.get(f"{API_BASE_URL}/")
+
+    @task(2)
     def predict(self):
+        """Test for the `predict` endpoint. It authenticates first, then sends a POST request with a file."""
         token = login("admin@example.com", "admin")
-        files = [("file", ("dog.jpeg", open("dog.jpeg", "rb"), "image/jpeg"))]
-        headers = {"Authorization": f"Bearer {token}"}
-        payload = {}
-        self.client.post(
-            "http://0.0.0.0:8000/model/predict",
-            headers=headers,
-            data=payload,
-            files=files,
-        )
+        if token:
+            files = [("file", ("dog.jpeg", open("dog.jpeg", "rb"), "image/jpeg"))]
+            headers = {"Authorization": f"Bearer {token}"}
+            payload = {}
+            self.client.post(
+                f"{API_BASE_URL}/model/predict",
+                headers=headers,
+                data=payload,
+                files=files,
+            )
+        else:
+            print("Failed to authenticate and obtain token.")
