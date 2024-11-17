@@ -13,7 +13,7 @@ from tensorflow.keras.preprocessing import image
 # Connect to Redis and assign to variable `db``
 # Make use of settings.py module to get Redis settings like host, port, etc.
 try:
-    db = redis.StrictRedis(
+    db = redis.Redis(
         host=settings.REDIS_IP,
         port=settings.REDIS_PORT,
         db=settings.REDIS_DB_ID
@@ -102,19 +102,21 @@ def classify_process():
         #       code with Redis making use of functions brpop() and set().
         # TODO
         # 1.  Take a new job from Redis
-        job_data = db.brpop(settings.REDIS_QUEUE, timeout=5)
+        job_data = db.brpop(settings.REDIS_QUEUE,timeout=settings.SERVER_SLEEP)
 
         if job_data is not None:
 
 
             # Decode the JSON data for the given job
-            job_id, job_info = job_data
+            _, job_info = job_data
             job_info = json.loads(job_info)
 
             # Important! Get and keep the original job ID
-            job_id = job_info["job_id"]
+            job_id = job_info["id"]
             image_name = job_info["image_name"]
 
+            # Get the file name without directories
+            image_name = image_name.split("/")[-1]
             # #2. Run the loaded ml model (use the predict() function)
             class_name, pred_probability = predict(image_name)
 

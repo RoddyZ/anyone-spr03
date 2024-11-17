@@ -22,7 +22,7 @@ def allowed_file(filename):
     # Current implementation will return True for any file
     # Check if the file extension of the filename received is in the set of allowed extensions (".png", ".jpg", ".jpeg", ".gif")
     #divide el nombre del archivo en su nombre y extensión
-    extensionArchivo = os.path.splitext(filename)[1]
+    extensionArchivo = os.path.splitext(filename)[-1]
 
     permitidoExt = {'.png', '.jpg', '.jpeg', '.gif'}
 
@@ -60,6 +60,6 @@ async def get_file_hash(file):
     await file.seek(0)
 
     # Add original file extension
-    file_extension = os.path.splitext(file.filename)[1]
+    file_extension = os.path.splitext(file.filename)[-1]
     #return file.filename
     return f"{file_hash}{file_extension}"
